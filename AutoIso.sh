@@ -40,10 +40,3 @@ username=${username:-"test"}
 commande=$commande"bootappend-live \"boot=live components autologin username=$username lang=fr_FR.UTF-8 locales=fr_FR.UTF-8 keyboard-layouts=fr keyboard-model=pc105 timezone=Europe/Paris utc=yes toram swap=true\""
 echo $commande
 ##########################
-#lb config noauto \
-#    --architectures i386 \
-#    --linux-flavours "586 686-pae" \
-#    --linux-packages $image \
-#    --ignore-system-defaults \
-#    --bootappend-live "boot=live components autologin username=test"
-#    "${@}"
