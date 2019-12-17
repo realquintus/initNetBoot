@@ -30,14 +30,20 @@ while true;do
 		break
 	fi
 	echo "Entrez une version valide de Debian (Buster, Stretch, Jessie, Wheezy, Squeeze, Lenny ou Etch):" 
-	read image
+	read version
 done;
 ##########################
-commande=$commande"--linux-packages \"linux-image\" --ignore-system-defaults"
+commande=$commande"--linux-packages \"linux-image\" --ignore-system-defaults  "
+##	Packages	##
+echo "Entrez des paquets supplémentaires à ajouter à l'image (Les séparés d'un espace)"
+read packages
+if ! [[ $packages = "" ]];then
+       commande=$commande"--packages \"$packages\" "
+fi
 echo "Entrez le nom de l'utilisateur (test par défault):"
 read username
 username=${username:-"test"}
 commande=$commande"bootappend-live \"boot=live components autologin username=$username lang=fr_FR.UTF-8 locales=fr_FR.UTF-8 keyboard-layouts=fr keyboard-model=pc105 timezone=Europe/Paris utc=yes toram swap=true\""
 echo $commande
-#eval $commande
+eval $commande
 ##########################
