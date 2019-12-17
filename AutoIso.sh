@@ -39,4 +39,5 @@ read username
 username=${username:-"test"}
 commande=$commande"bootappend-live \"boot=live components autologin username=$username lang=fr_FR.UTF-8 locales=fr_FR.UTF-8 keyboard-layouts=fr keyboard-model=pc105 timezone=Europe/Paris utc=yes toram swap=true\""
 echo $commande
+#eval $commande
 ##########################
