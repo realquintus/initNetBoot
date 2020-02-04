@@ -1,6 +1,6 @@
 #!/bin/bash
 
-while getopts "f:v" option;do
+while getopts "f:v:I" option;do
 	case $option in
 		f)
 			if [ -e $OPTARG ];then
@@ -12,6 +12,12 @@ while getopts "f:v" option;do
 		;;
 		v)
 			verb="true"
+		;;
+		I)
+			if [ -n $(ip a | grep -E "^[1-9]:" | cut -d ":" -f2 | sed 's/ //g' | grep $OPTARG) ];then
+				interface=$OPTARG
+				srv_ip=$(ifconfig wlp2s0 | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | sed -n 1p)
+			fi
 		;;
 	esac
 done
@@ -40,6 +46,9 @@ sudo cp $(echo $0 | sed 's/initNetBoot.sh//g')pxelinux_menu.txt /var/lib/tftpboo
 
 ################ Get needed library and put it in tftp folder #####################################################
 cd /														  #
+if [[ $verb = "true" ]];then
+	echo "Copying needed  library un tftp folder..."
+fi
 path_lib=$(locate -e pxelinux.0 | grep -E /pxelinux.0$ | sed 's/\/pxelinux.0//g' )				  #
 if [ -z $(ls /var/lib/tftpboot/ | grep pxelinux.0) ];then							  #
 	cp -r $(echo $path_lib)/{pxelinux.0,vesamenu.c32,ldlinux.c32,libcom32.c32,libutil.c32} /var/lib/tftpboot/ #
@@ -53,6 +62,15 @@ fi														  #
 #sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.old
 
 ################ Make the image available on the network ############
+if [[ $verb = "true" ]];then
+	echo "Copying netboot image on tftp folder..."
+fi
 file_exten=$(echo $image | awk -F "." '{print $NF}')		    #
 sudo cp $image /var/lib/tftpboot/netboot_image.$(echo $file_exten)  #
 #####################################################################
+
+# Configure dnsmasq
+if [[ $verb = "true" ]];then
+	echo "Configuring dnsmasq..."
+fi
+sed "s/%NIC%/$interface/g" dnsmasq.conf | sed "s/%srv_addr%/$srv_ip/g" > /etc/dnsmasq.conf
