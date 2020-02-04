@@ -1,0 +1,15 @@
+default vesamenu.c32
+prompt 1
+timeout 600
+
+menu title Boot menu
+
+label linux
+menu label ^Boot from network
+menu default
+kernel f30/vmlinuz
+append 
+
+label local
+menu label Boot from ^local drive
+localboot 0xffff
