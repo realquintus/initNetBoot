@@ -1,6 +1,6 @@
 #!/bin/bash
 ##########################################################################################
-#	Customiso.sh allows, as its name suggests, to modify and customize iso's easily  #
+#	Customiso.sh allows, as its name suggests, to modify and customize iso easily  #
 ##########################################################################################
 usage(){
 	echo -e "Customiso.sh allows, as its name suggests, to modify and customize iso easily\nYou can enter a iso file as first argument"
