@@ -54,8 +54,10 @@ lib=$(ls /var/lib/)												  	       #
 [ -z $(echo $lib | grep pacman) ] 2> /dev/null || install_command="pacman -Sy  $(if [[ $verb = "true" ]];then;echo "-q";fi) --noconfirm dnsmasq syslinux"      	       #
 [ -z $(echo $lib | grep yum) ] 2> /dev/null || install_command="yum install -y $(if [[ $verb = "true" ]];then;echo "-q";fi) dnsmasq syslinux"       			       #
 if [[ $verb = "true" ]];then												       #
-	echo "Executing: "$install_command										       #
-fi		
+	echo "Installing needed packages: "$install_command										       #
+else
+	install_command="$install_command"" > /dev/null"
+fi
 eval $install_command													       #
 ################################################################################################################################
 
