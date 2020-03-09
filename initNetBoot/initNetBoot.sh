@@ -45,7 +45,7 @@ done															#
 #########################################################################################################################
 
 # Checking if every needed informations are specified
-if [ -z $image ] || [ -z $interface ] || [ -z $srv_ip ];then
+if [ -z $image ] || [ -z $interface ];then
 	echo "An information is missing, please read the following message:"
 	usage
 	exit 4
@@ -56,21 +56,22 @@ fi
 
 #################### Installing/updating dependencies #####################################################################################################
 lib="$(ls /var/lib/)"												  	       				  #
-if ! [ -z $(echo $lib | grep "apt") ];then
+if ! [ -z $(echo $lib | grep -Eo "apt") ];then
 	install_command="apt install -y ""$(if [ -z $verb ];then echo '-q ';fi)""dnsmasq syslinux-common"  	  #
-fi
-if ! [ -z $(echo $lib | grep "pacman") ];then
+elif ! [ -z $(echo $lib | grep -Eo "pacman") ];then
 	install_command="pacman -Sy $(if [ -z $verb ];then echo '-q ';fi)--noconfirm dnsmasq syslinux" #
-fi
-if ! [ -z $(echo $lib | grep "yum") ];then
+elif ! [ -z $(echo $lib | grep -Eo "yum") ];then
 	install_command="yum install -y $(if [ -z $verb ];then echo '-q ';fi)dnsmasq syslinux"
+else 
+	echo "Warning: Your package manager is not detected, make sure you have installed dnsmasq and syslinux (or syslinux-common)"
 fi
 if [[ $verb = "true" ]];then												       				  #
-	echo "Installing needed packages: "$install_command										      		  #
+	echo -e "\n## Installing needed packages: $install_command ##"										      		  #
 else																			  #
 	install_command="$install_command"" > /dev/null"												  #
 fi																			  #
 eval $install_command													       				  #
+echo -e "## Installation finished ##\n"
 ###########################################################################################################################################################
 
 ######## Creating tftp folder #################
@@ -90,7 +91,7 @@ sudo cp $(echo $0 | sed 's/initNetBoot.sh//g')pxelinux_menu.txt /var/lib/tftpboo
 ################ Get needed library and put it in tftp folder #####################################################
 														  #
 if [[ $verb = "true" ]];then											  #
-	echo "Copying needed  library un tftp folder..."							  #
+	echo "Copying needed library un tftp folder..."							  #
 fi														  #
 path_lib=$(locate -e pxelinux.0 | grep -E /pxelinux.0$ | sed 's/\/pxelinux.0//g' )				  #
 if [ -z $(ls /var/lib/tftpboot/ | grep pxelinux.0) ];then							  #
@@ -111,5 +112,5 @@ sudo cp $image /var/lib/tftpboot/netboot_image.$(echo $file_exten)  #
 if [[ $verb = "true" ]];then									 #
 	echo "Configuring dnsmasq..."								 #
 fi												 #
-cat $(echo $0 | sed 's/initNetBoot.sh//g')dnsmasq.conf | sed "s/%NIC%/$interface/g" | sed "s/%srv_addr%/$srv_ip/g" > /etc/dnsmasq.conf #
+cat $(echo $0 | sed 's/initNetBoot.sh//g')dnsmasq.conf | sed "s/%NIC%/$interface/g" > /etc/dnsmasq.conf #
 ##################################################################################################
