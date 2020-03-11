@@ -57,7 +57,7 @@ fi											#
 ip addr add 192.168.55.254/24 dev $interface						#
 #########################################################################################
 
-  if [ -z $image ] || [ -z $interface ];then
+if [ -z $image ] || [ -z $interface ];then
 	echo "An information is missing, please read the following message:"
 	usage
 	exit 4
@@ -118,8 +118,8 @@ fi														  #
 if [[ $verb = "true" ]];then					    #
 	echo "Copying netboot image on tftp folder..."		    #
 fi								    #
-file_exten=$(echo $image | awk -F "." '{print $NF}')		    #
-sudo cp $image /var/lib/tftpboot/netboot_image.$(echo $file_exten)  #
+#file_exten=$(echo $image | awk -F "." '{print $NF}')		    #
+sudo cp -r $image /var/lib/tftpboot/				#
 #####################################################################
 
 ########################### Configure dnsmasq ###########################################################
