@@ -73,16 +73,26 @@ fi
 lib="$(ls /var/lib/)"												  	       				#
 if ! [ -z $(echo $lib | grep -o "apt") ];then														#
 	install_command="apt install -y ""$(if [ -z $verb ];then echo '-q ';fi)""dnsmasq pxelinux syslinux-common"  	  					#
+	if [ -n $live ];then
+		install_command="$install_command"" nfs-kernel-server"
+	fi
 elif ! [ -z $(echo $lib | grep -o "pacman") ];then													#
 	install_command="pacman -Sy $(if [ -z $verb ];then echo '-q ';fi)--noconfirm dnsmasq pxelinux syslinux" 							#
+	if [ -n $live ];then
+		install_command="$install_command"" nfs-utils"
+	fi
 elif ! [ -z $(echo $lib | grep -o "yum") ];then														#
 	install_command="yum install -y $(if [ -z $verb ];then echo '-q ';fi)dnsmasq pxelinux syslinux"								#
+	if [ -n $live ];then
+		install_command="$install_command"" nfs-utils"
+	fi
 else 																			#
 	echo "Warning: Your package manager is not detected, make sure you have install dnsmasq, pxelinux and syslinux (or syslinux-common) packages"			#
 fi																			#
 if [ -z $no_install ];then
 	if [[ $verb = "true" ]];then												       				#
 		echo -e "\n## Installing needed packages: $install_command ##"										      	#
+	else
 		install_command="$install_command"" > /dev/null"												#
 	fi																			#
 	eval $install_command													       				#
@@ -92,9 +102,15 @@ fi
 
 ######## Creating tftp folder #################
 if [[ $verb = "true" ]];then		      #
-	echo "Creating tftp's folder"	      #
+	echo "Creating tftp's folder: /var/tftpboot/"	      #
 fi					      #
 sudo mkdir -p /var/tftpboot/pxelinux.cfg/ #
+if [ -n $live ];then
+	if [[ $verb = "true" ]];then		      #
+		echo "Creating NFS and live folders: /var/tftpboot/nfs and /var/tftpboot/live/"	      #
+	fi
+	mkdir /var/tftpboot/live/ /var/tftpboot/nfs	#
+fi
 ###############################################
 
 ###################### Creating boot menu ###############################################################
@@ -120,11 +136,48 @@ fi														  #
 
 #cd $(echo $0 | sed 's/initNetBoot.sh//g')
 ################ Make the image available on the network ############
-if [[ $verb = "true" ]];then					    #
-	echo "Copying netboot image on tftp folder..."		    #
-fi								    #
-file_exten=$(echo $image | awk -F "." '{print $NF}')		    #
-sudo cp $image /var/tftpboot/netboot_image.$(echo $file_exten)  #
+if [ -z $live ];then
+	if [[ $verb = "true" ]];then					    #
+		echo "Copying netboot image on tftp folder..."		    #
+	fi								    #
+	file_exten=$(echo $image | awk -F "." '{print $NF}')		    #
+	sudo cp $image /var/tftpboot/netboot_image.$(echo $file_exten)  #
+else
+	if [[ $verb = "true" ]];then		      #
+		echo "# Mounting iso #"	      #
+		echo -e "\tCreating /mnt/netiso/ folder"
+	fi					      #
+	mkdir -p /mnt/netiso/
+	if [[ $verb = "true" ]];then		      #
+		echo -e "\tMounting iso on /mnt/netiso"	      #
+	fi					      #
+	mount -o loop $image /mnt/netiso/ > /dev/null
+	if [[ $verb = "true" ]];then		      #
+		echo -e "\tCopying mounted files in nfs folder"	      #
+	fi					      #
+	cp -r /mnt/netiso/* /var/tftpboot/nfs/
+	if [[ $verb = "true" ]];then		      #
+		echo -e "\tUnmounting image"	      #
+		echo "################"
+	fi					      #
+	umount /mnt/netiso
+	if [[ $verb = "true" ]];then		      #
+		echo "Copying kernel and base system in /var/tftpboot/live"	      #
+	fi					      #
+	cp /var/tftpboot/nfs/casper/{initrd,vmlinuz} /var/tftpboot/live/
+	if [[ $verb = "true" ]];then		      #
+		echo "Configuring NFS"	      #
+	fi					      #
+	if [ -z $(cat /etc/exports | grep "/var/tftpboot/nfs 192.168.55.0/24(sync,no_root_squash,no_subtree_check,ro)") ];then
+		rm /etc/exports
+		cp ./nfs.config /etc/exports
+	fi
+	if [[ $verb = "true" ]];then		      #
+		echo "Initializing NFS server"	      #
+	fi					      #
+	systemctl start nfs-server.service
+	exportfs -a
+fi
 #####################################################################
 
 ########################### Configure dnsmasq ###########################################################
@@ -135,5 +188,5 @@ cat $(echo $0 | sed 's/initNetBoot.sh//g')dnsmasq.conf | sed "s/%NIC%/$interface
 if [[ $verb = "true" ]];then									 	#
 	echo "Restarting dnsmasq..."								 	#
 fi												 	#
-systemctl restart 
+systemctl restart nfs-server.service
 #########################################################################################################
