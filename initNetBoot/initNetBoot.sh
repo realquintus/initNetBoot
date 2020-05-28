@@ -69,18 +69,17 @@ fi
 #################### Installing/updating dependencies ###################################################################################################
 lib="$(ls /var/lib/)"												  	       				#
 if ! [ -z $(echo $lib | grep -o "apt") ];then														#
-	install_command="apt install -y ""$(if [ -z $verb ];then echo '-q ';fi)""dnsmasq syslinux-common"  	  					#
+	install_command="apt install -y ""$(if [ -z $verb ];then echo '-q ';fi)""dnsmasq pxelinux syslinux-common locate"  	  					#
 elif ! [ -z $(echo $lib | grep -o "pacman") ];then													#
-	install_command="pacman -Sy $(if [ -z $verb ];then echo '-q ';fi)--noconfirm dnsmasq syslinux" 							#
+	install_command="pacman -Sy $(if [ -z $verb ];then echo '-q ';fi)--noconfirm dnsmasq pxelinux syslinux locate" 							#
 elif ! [ -z $(echo $lib | grep -o "yum") ];then														#
-	install_command="yum install -y $(if [ -z $verb ];then echo '-q ';fi)dnsmasq syslinux"								#
+	install_command="yum install -y $(if [ -z $verb ];then echo '-q ';fi)dnsmasq pxelinux syslinux locate"								#
 else 																			#
-	echo "Warning: Your package manager is not detected, make sure you have installed dnsmasq and syslinux (or syslinux-common)"			#
+	echo "Warning: Your package manager is not detected, make sure you have install dnsmasq pxelinux,locate and syslinux (or syslinux-common) packages"			#
 fi																			#
 if [ -z $no_install ];then
 	if [[ $verb = "true" ]];then												       				#
 		echo -e "\n## Installing needed packages: $install_command ##"										      	#
-	else																			#
 		install_command="$install_command"" > /dev/null"												#
 	fi																			#
 	eval $install_command													       				#
@@ -92,24 +91,26 @@ fi
 if [[ $verb = "true" ]];then		      #
 	echo "Creating tftp's folder"	      #
 fi					      #
-sudo mkdir -p /var/lib/tftpboot/pxelinux.cfg/ #
+sudo mkdir -p /var/tftpboot/pxelinux.cfg/ #
 ###############################################
 
 ###################### Creating boot menu ###############################################################
 if [[ $verb = "true" ]];then										#
-	echo "Loading boot menu in /var/lib/tftpboot/pxelinux.cfg"					#
+	echo "Loading boot menu in /var/tftpboot/pxelinux.cfg"					#
 fi													#
-sudo cp $(echo $0 | sed 's/initNetBoot.sh//g')pxelinux_menu.txt /var/lib/tftpboot/pxelinux.cfg/default 	#
+sudo cp $(echo $0 | sed 's/initNetBoot.sh//g')pxelinux_menu.txt /var/tftpboot/pxelinux.cfg/default 	#
 #########################################################################################################
 
 ################ Get needed library and put it in tftp folder #####################################################
 														  #
 if [[ $verb = "true" ]];then											  #
-	echo "Copying needed library un tftp folder..."							  	  #
+	echo "Copying needed library in tftp folder..."							  	  #
 fi														  #
 path_lib=$(locate -e pxelinux.0 | grep -E /pxelinux.0$ | sed 's/\/pxelinux.0//g' )				  #
-if [ -z $(ls /var/lib/tftpboot/ | grep pxelinux.0) ];then							  #
-	cp -r $(echo $path_lib)/{pxelinux.0,vesamenu.c32,ldlinux.c32,libcom32.c32,libutil.c32} /var/lib/tftpboot/ #
+if [ -z $(ls /var/tftpboot/ | grep pxelinux.0) ];then							  #
+	cp -r $(echo $path_lib)/{pxelinux.0,vesamenu.c32,ldlinux.c32,libcom32.c32,libutil.c32} /var/tftpboot/ #
+	cp /usr/lib/syslinux/memdisk /var/tftpboot/
+	cp /usr/lib/syslinux/modules/bios/* /var/tftpboot
 fi														  #
 ###################################################################################################################
 
@@ -119,7 +120,7 @@ if [[ $verb = "true" ]];then					    #
 	echo "Copying netboot image on tftp folder..."		    #
 fi								    #
 file_exten=$(echo $image | awk -F "." '{print $NF}')		    #
-sudo cp $image /var/lib/tftpboot/netboot_image.$(echo $file_exten)  #
+sudo cp $image /var/tftpboot/netboot_image.$(echo $file_exten)  #
 #####################################################################
 
 ########################### Configure dnsmasq ###########################################################
