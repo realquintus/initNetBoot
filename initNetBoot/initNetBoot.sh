@@ -1,9 +1,9 @@
 #!/bin/bash
 usage(){
-	echo -e "\e[1mInitNetBoot.sh\e[0m is a bash script that is used to initialize a network boot server using PXE.\nFirstly, it will install/update dependencies, then configure and enable DHCP and TFTP server.\n\t\e[1m\e[4mOptions:\e[0m\e[0m\n\t\t-h : Show this help message.\n\t\t-f : This option is needed and is used to indicate the image that you want to be available on the local network.\n\t\t-I : This option is required and is used to indicates the network interface through which the server will be available.\n\t\t-v : Verbose mode"
+	echo -e "\e[1mInitNetBoot.sh\e[0m is a bash script that is used to initialize a network boot server using PXE.\nFirstly, it will install/update dependencies, then configure and enable DHCP and TFTP server.\n\t\e[1m\e[4mOptions:\e[0m\e[0m\n\t\t-h : Show this help message.\n\t\t-f : This option is needed and is used to indicate the image that you want to be available on the local network.\n\t\t-I : This option is required and is used to indicates the network interface through which the server will be available.\n\t\t-v : Verbose mode\n\t\t-N : This option is not required and permit to not install needed packages, use it only if you already have them.\n\t\t-l : This option is not required and permit to make available a live image on the network. Make sure to a compatible image. If this option is not entered the image will be installed on the PXE client."
 }
 ########################################## Handling options ############################################################
-while getopts "f:vI:hN" option;do											#
+while getopts "f:vI:hNl" option;do											#
 	case $option in													#
 		f)													#
 			if [ -e $OPTARG ];then										#
@@ -33,6 +33,9 @@ while getopts "f:vI:hN" option;do											#
 		N)
 			no_install="true"
 		;;
+		l)
+			live="true"
+		;;
 	esac														#
 done															#
 #########################################################################################################################
@@ -40,7 +43,7 @@ done															#
 ############# Configuring network interface #############################################
 if [ -z $(ifconfig $interface | sed -n '1p' | grep -o "UP") ];then			#	
 	if [[ $verb = "true" ]];then							#
-		echo "The interface is down, setting it up"				#
+		echo "The interface is down, setting it up..."				#
 	fi										#
 	ip link set up dev $interface							#
 fi											#
@@ -69,13 +72,13 @@ fi
 #################### Installing/updating dependencies ###################################################################################################
 lib="$(ls /var/lib/)"												  	       				#
 if ! [ -z $(echo $lib | grep -o "apt") ];then														#
-	install_command="apt install -y ""$(if [ -z $verb ];then echo '-q ';fi)""dnsmasq pxelinux syslinux-common locate"  	  					#
+	install_command="apt install -y ""$(if [ -z $verb ];then echo '-q ';fi)""dnsmasq pxelinux syslinux-common"  	  					#
 elif ! [ -z $(echo $lib | grep -o "pacman") ];then													#
-	install_command="pacman -Sy $(if [ -z $verb ];then echo '-q ';fi)--noconfirm dnsmasq pxelinux syslinux locate" 							#
+	install_command="pacman -Sy $(if [ -z $verb ];then echo '-q ';fi)--noconfirm dnsmasq pxelinux syslinux" 							#
 elif ! [ -z $(echo $lib | grep -o "yum") ];then														#
-	install_command="yum install -y $(if [ -z $verb ];then echo '-q ';fi)dnsmasq pxelinux syslinux locate"								#
+	install_command="yum install -y $(if [ -z $verb ];then echo '-q ';fi)dnsmasq pxelinux syslinux"								#
 else 																			#
-	echo "Warning: Your package manager is not detected, make sure you have install dnsmasq pxelinux,locate and syslinux (or syslinux-common) packages"			#
+	echo "Warning: Your package manager is not detected, make sure you have install dnsmasq, pxelinux and syslinux (or syslinux-common) packages"			#
 fi																			#
 if [ -z $no_install ];then
 	if [[ $verb = "true" ]];then												       				#
@@ -98,7 +101,11 @@ sudo mkdir -p /var/tftpboot/pxelinux.cfg/ #
 if [[ $verb = "true" ]];then										#
 	echo "Loading boot menu in /var/tftpboot/pxelinux.cfg"					#
 fi													#
-sudo cp $(echo $0 | sed 's/initNetBoot.sh//g')pxelinux_menu.txt /var/tftpboot/pxelinux.cfg/default 	#
+if [ -z $live ];then
+	sudo cp $(echo $0 | sed 's/initNetBoot.sh//g')pxe_installation.menu /var/tftpboot/pxelinux.cfg/default 	#
+else
+	sudo cp $(echo $0 | sed 's/initNetBoot.sh//g')pxe_live.menu /var/tftpboot/pxelinux.cfg/default 	#
+fi
 #########################################################################################################
 
 ################ Get needed library and put it in tftp folder #####################################################
@@ -106,11 +113,8 @@ sudo cp $(echo $0 | sed 's/initNetBoot.sh//g')pxelinux_menu.txt /var/tftpboot/px
 if [[ $verb = "true" ]];then											  #
 	echo "Copying needed library in tftp folder..."							  	  #
 fi														  #
-path_lib=$(locate -e pxelinux.0 | grep -E /pxelinux.0$ | sed 's/\/pxelinux.0//g' )				  #
 if [ -z $(ls /var/tftpboot/ | grep pxelinux.0) ];then							  #
-	cp -r $(echo $path_lib)/{pxelinux.0,vesamenu.c32,ldlinux.c32,libcom32.c32,libutil.c32} /var/tftpboot/ #
-	cp /usr/lib/syslinux/memdisk /var/tftpboot/
-	cp /usr/lib/syslinux/modules/bios/* /var/tftpboot
+	sudo cp /usr/lib/syslinux/bios/* /var/tftpboot/
 fi														  #
 ###################################################################################################################
 
@@ -128,4 +132,8 @@ if [[ $verb = "true" ]];then									 	#
 	echo "Configuring dnsmasq..."								 	#
 fi												 	#
 cat $(echo $0 | sed 's/initNetBoot.sh//g')dnsmasq.conf | sed "s/%NIC%/$interface/g" > /etc/dnsmasq.conf #
+if [[ $verb = "true" ]];then									 	#
+	echo "Restarting dnsmasq..."								 	#
+fi												 	#
+systemctl restart 
 #########################################################################################################

@@ -1,0 +1,15 @@
+DEFAULT vesamenu.c32
+PROMPT 1
+TIMEOUT 600
+
+MENU TITLE Boot menu
+LABEL hdt
+ MENU LABEL ^Boot from network
+ MENU default
+ LINUX memdisk
+ INITRD netboot_image.iso
+ APPEND iso raw
+
+LABEL local
+MENU LABEL Boot from ^local drive
+LOCALBOOT 0xffff
