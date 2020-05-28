@@ -188,5 +188,5 @@ cat $(echo $0 | sed 's/initNetBoot.sh//g')dnsmasq.conf | sed "s/%NIC%/$interface
 if [[ $verb = "true" ]];then									 	#
 	echo "Restarting dnsmasq..."								 	#
 fi												 	#
-systemctl restart nfs-server.service
+systemctl restart dnsmasq.service
 #########################################################################################################
