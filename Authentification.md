@@ -46,7 +46,73 @@ Df -h
 L'inconvénient est que la dernière version de NFS est désormais plus difficile à configurer dès que l'on veut utiliser des fonctions de sécurité de base telles que l'authentification et le chiffrement, puisqu'il repose sur Kerberos pour ces fonctionnalités.
 
 Et sans ces deux dernières, l'utilisation du protocole NFS doit se limiter à un réseau local de confiance car les données qui circulent sur le réseau ne sont pas chiffrées (un sniffer peut les intercepter) et les droits d'accès sont accordés en fonction de l'adresse IP du client (qui peut être usurpée).
+Il nous faut donc maintenant
+Tout d'abord,
+```
+apt-get install krb5-kdc
+```
+il faut ensuite ajouter le nom du royamme, le royaume est le nom d'une entité administrative qui met à jour des données d'authentification.
+Dans mon cas DEBIAN en majuscule. Puis debian en minuscule pour le serveur d'authentification.
+Une fois l'installation terminer il nous faut aller dans le fichier.
+```
+/etc/krb5.conf
+```
+dans la partie [domain_realm] on ajoute les deux serveur que nous venons de renseigner. 
+de cette façon :
+```
+.debian = DEBIAN
+ debian = DEBIAN
+```
+On installe maintenant.
+```
+apt-get install krb5-admin-server
+```
+Puis,
+```
+krb5_newream
+```
+Pour rensigner le mdp de notre royamme.
+Afin de crer un compte admin il nous faut aller dans le fichier
+```
+/etc/krb5kdc/kadm5.acl
+```
+Pour activer la dernière ligne, a savoir */admin
 
+On relance le tout.
+```
+service krb5-kdc restart; service krb5-admin-server restart
+```
+Il nous faut maintenant céer un utilisateur, pour ce faire :
+```
+kadmin.local
+```
+Une fois entrée dans kadmin.local, il faut créer le user root.
+```
+addprinc root/admin
+```
+On sort de cette invit de commande avec q.
+Puis on réalise la commande afin de créer un ticket.
+On renseigne le mdp passe créer précedement 
+```
+kinit root/admin
+```
+On lance la commande kadmin pour ajouter des principaux à la base de données, ou changent les mots de passe des principaux existants. 
+our ajouter des principaux à la base de données, ou changent les mots de passe des principaux existants. 
+```
+kadmin -p root/admin 
+```
+Il faut entrer le mdp.
+Avec listprincs on peut voir les utilisateurs déjà créé.
+Il nous faurt dersormer en ajouter 1 pour le serveur NFS.
+Pour ce faire :
+```
+addprinc server_nfs/admin
+```
+Par exemple.
+Il vous vouler le supprimer il suffit de faire la commande,
+```
+delprinc server_nfs/admin
+```
 NFS
 https://www.netapp.com/fr/communities/tech-ontap/nfsv4-0508-fr.aspx
 https://help.ubuntu.com/community/NFSv4Howto
