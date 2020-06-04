@@ -52,6 +52,7 @@ En effet il nous faut maintenant le diffuser à tout les postes.
 Nous pouvons désormer le diffuser, reste maintenant à l'adapter à chaque TP
 ## Création d'un outil permettant de créer une image adapté pour chaque TP <a id="image"></a>
 Pour pouvoir l'adapter à chaque TP, nous avons pensé à un script qui permettrait cela.
+https://md.iutbeziers.org/w24n8SSKSOmH7BR6MY5M5A#
 ...
 L'OS est en place sur les machines, mais nous faut pouvoir jointre les autres postes, celui du professeur ou encore internet.
 ## Déploiement du serveur DHCP <a id="DHCP"></a>
