@@ -11,18 +11,18 @@
 #sudo cd $HOME/live-debian
 #echo -e "Le script va construite l'image ISO dans le répertoire $(echo$(pwd))"
 #sudo lb config
-ubuntu="0"
-debian="0"
+ubuntu=0
+debian=0
 echo -e "L'initialisation de la construction de l'image ISO est en cours, \n des choix sur la personnalisation de celle-ci vont vous être proposés. \n 
 Veuillez répondre correctement. "
 echo -e "Quel distribution de Linux ? \t [debian - ubuntu]"
 read dist
-while [ $dist != "debian" ] | [ $dist != "ubuntu" ]; do
+while [ $debian -ne 1 ] | [ $ubuntu -ne 1 ]; do
 	if [[ $dist == "debian" ]]; then 
-		debian="1"
+		debian=1
 		break
 	elif [[ $dist == "ubuntu" ]]; then
-       		ubuntu="1"
+       		ubuntu=1
 		break	
 	else
 		echo "Veuillez remplir correctement le champ indiqué"
