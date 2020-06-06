@@ -1,16 +1,18 @@
 ### Test de présence du paquet live-build
-#test=$(lb --version)
-#if [ -n "$test" ]; then 
-	#echo -e "Live-Build installé en version $(echo $test) \n"
-#else 
-	#echo -e "Live-Build n'est pas installé, l'installation va démarrer \n "
-	#sudo apt install live-build
-#fi
+test=$(lb --version)
+if [ -n "$test" ]; then 
+	echo -e "Live-Build installé en version $(echo $test)"
+else 
+	echo -e "Live-Build n'est pas installé, l'installation va démarrer \n "
+	sudo apt install live-build
+fi
 
-#sudo mkdir $HOME/live-debian
-#sudo cd $HOME/live-debian
-#echo -e "Le script va construite l'image ISO dans le répertoire $(echo$(pwd))"
+sudo mkdir -p $HOME/live-debian
+cd $HOME/live-debian
+echo -e "Le script va construite l'image ISO dans le répertoire $HOME/live-debian"
 #sudo lb config
+
+
 ubuntu=0
 debian=0
 dist="null"
@@ -33,5 +35,6 @@ while [ $debian -ne 1 ] | [ $ubuntu -ne 1 ]; do
 		continue
 	fi
 done
-echo -e "debian : $debian"
-echo -e "ubuntu : $ubuntu"
+
+
+
