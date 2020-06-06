@@ -13,10 +13,11 @@
 #sudo lb config
 ubuntu=0
 debian=0
+dist="null"
 echo -e "L'initialisation de la construction de l'image ISO est en cours, \n des choix sur la personnalisation de celle-ci vont vous être proposés. \n 
 Veuillez répondre correctement. "
 echo -e "Quel distribution de Linux ? \t [debian - ubuntu]"
-read dist
+
 while [ $debian -ne 1 ] | [ $ubuntu -ne 1 ]; do
 	if [[ $dist == "debian" ]]; then 
 		debian=1
@@ -25,7 +26,9 @@ while [ $debian -ne 1 ] | [ $ubuntu -ne 1 ]; do
        		ubuntu=1
 		break	
 	else
-		echo "Veuillez remplir correctement le champ indiqué"
+		if [[ $dist != "null" ]];then
+			echo "Veuillez remplir correctement le champ indiqué"
+		fi
 		read dist
 		continue
 	fi
