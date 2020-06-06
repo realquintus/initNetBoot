@@ -17,11 +17,11 @@ echo -e "L'initialisation de la construction de l'image ISO est en cours, \n des
 Veuillez répondre correctement. "
 echo -e "Quel distribution de Linux ? \t [debian - ubuntu]"
 read dist
-while [ -z $dist ] | [ $dist != "debian" ] | [ $dist != "ubuntu" ]; do
-	if [ $(echo $dist) = "debian" ]; then 
+while [ $dist != "debian" ] | [ $dist != "ubuntu" ]; do
+	if [[ $dist == "debian" ]]; then 
 		debian="1"
 		break
-	elif [ $(echo $dist) = "ubuntu" ]; then
+	elif [[echo $dist == "ubuntu" ]]; then
        		ubuntu="1"
 		break	
 	else
