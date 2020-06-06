@@ -21,7 +21,7 @@ while [ $dist != "debian" ] | [ $dist != "ubuntu" ]; do
 	if [[ $dist == "debian" ]]; then 
 		debian="1"
 		break
-	elif [[echo $dist == "ubuntu" ]]; then
+	elif [[ $dist == "ubuntu" ]]; then
        		ubuntu="1"
 		break	
 	else
