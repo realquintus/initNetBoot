@@ -67,6 +67,11 @@ On installe maintenant.
 ```
 apt-get install krb5-admin-server
 ```
+Si une erreur est détecté, cela veut dire qu'il faut créer la base de donnée qui prote comme nom votre royamme.
+```
+kdb5_util create -s -r DEBIAN
+```
+Pour ne pas créer de problème, il faut l'host 
 Puis,
 ```
 krb5_newream
