@@ -7,7 +7,7 @@ while getopts "Fnhv" option;do
 	case $option in
 		h)
 			usage
-			exit 1
+			exit 0
 		;;
 		v)
 			verb="true"
