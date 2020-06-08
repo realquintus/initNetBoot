@@ -24,9 +24,9 @@ debian=0
 
 dist="null"
 ################################################ Loop for the selection of the distribution #############################################################	
-echo -e "L'initialisation de la construction de l'image ISO est en cours, \n des choix sur la personnalisation de celle-ci vont vous être proposés." 	#
-echo -e "\t\tVeuillez répondre correctement. "														#
-echo -e "Quel distribution de Linux voulez-vous ? \t [debian - ubuntu]"											#
+echo -e "L'initialisation de la construction de l'image ISO est en cours, \ndes choix sur la personnalisation de celle-ci vont vous être proposés." 	#
+echo -e "\t\tVeuillez répondre correctement. \n\n"														#
+echo -e "Quel distribution de Linux voulez-vous ? \t [debian / ubuntu]"											#
 																			#
 while [ $debian -ne 1 ] | [ $ubuntu -ne 1 ]; do														#
 	if [[ $dist == "debian" ]]; then 														#
@@ -37,7 +37,7 @@ while [ $debian -ne 1 ] | [ $ubuntu -ne 1 ]; do														#
 		break																	#
 	else																		#
 		if [[ $dist != "null" ]];then														#
-			echo "Veuillez remplir correctement le champ indiqué"										#
+			echo "Veuillez remplir correctement le champ indiqué\n"										#
 		fi																	#
 		read dist																#
 		continue																#
@@ -62,9 +62,9 @@ mate_d=0				#
 ########################################################### Loop for environment metapackages selection #########################################################
 envi="null"																			#
 if [ $debian -eq 1 ]; then																	#
-	echo -e "Quel envirronement graphique Debian voulez-vous ? \t [gnome_u - kde_u - mate_u]"								#
+	echo -e "Quel envirronement graphique Debian voulez-vous ? \t [gnome_d / kde_d / mate_d]"								#
 else																				#	
-	echo -e "Quel envirronement graphique Ubuntu voulez-vous ? \t [gnome_d - kde_d - mate_d - cinnamon]"							#
+	echo -e "Quel envirronement graphique Ubuntu voulez-vous ? \t [gnome_u / kde_u / mate_u / cinnamon]"							#
 fi																				#
 																				#
 while [ $gnome_u -ne 1 ] | [ $kde_u -ne 1 ] | [ $mate_u -ne 1 ] | [ $cinnamon -ne 1 ] | [ $gnome_d -ne 1 ] | [ $kde_d -ne 1 ] | [ $mate_d -ne 1 ]; do		#
@@ -91,13 +91,43 @@ while [ $gnome_u -ne 1 ] | [ $kde_u -ne 1 ] | [ $mate_u -ne 1 ] | [ $cinnamon -n
 		break																		#
 	else																			#
 		if [[ $envi != "null" ]];then															#
-			echo "Veuillez remplir correctement le champ indiqué"											#
+			echo "Veuillez remplir correctement le champ indiqué\n"											#
 		fi																		#
 		read envi																	#
 		continue																	#
 	fi																			#
 done																				#
 #################################################################################################################################################################
+
+
+########################################## Loop for additional packages #########################	
+echo -e "Veuillez maintenant ajouter les paquets à inclure dans l'environnement.\n"		#
+echo -e "Veillez à taper le nom exacte du ou des paquets désirés, séparés par un espace. \n"	#
+echo -e "Une fois tous les paquets ajoutés, faites un "retour chariot" (entré). \n"		#
+												#
+read -a packets											#
+packetsLength=$(echo ${#packets[@]})								#
+arrayp=$(echo ${packets[@]})									#
+												#
+for i in `seq 1 $packetsLength`; do								#
+	echo $arrayp | cut -d" " -f$i >> package.list.chroot					#
+done												#
+#################################################################################################
+
+
+########################################## Loop for new files ###########################################	
+echo -e "Veuillez maintenant ajouter les fichier à inclure dans l'environnement.\n"			#
+echo -e "Veillez à taper le chemin exacte du ou des fichiers désirés, séparés par un espace. \n"	#
+echo -e "Une fois tous les paquets ajoutés, faites un "retour chariot" (entré). \n"			#
+													#
+read -a files												#
+fileLength=$(echo ${#files[@]})										#	
+arrayf=$(echo ${packets[@]})										#
+													#
+for i in `seq 1 $fileLength`; do									#
+	echo $arrayf | cut -d" " -f$i | xargs -i cp {}  includes.binary/ 									#
+done													#
+#########################################################################################################
 
 
 
