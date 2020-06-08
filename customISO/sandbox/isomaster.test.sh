@@ -25,7 +25,7 @@ debian=0
 dist="null"
 ################################################ Loop for the selection of the distribution #############################################################	
 echo -e "L'initialisation de la construction de l'image ISO est en cours, \ndes choix sur la personnalisation de celle-ci vont vous être proposés." 	#
-echo -e "\t\tVeuillez répondre correctement. \n\n"														#
+echo -e "\t\tVeuillez répondre correctement. \n\n"													#
 echo -e "Quel distribution de Linux voulez-vous ? \t [debian / ubuntu]"											#
 																			#
 while [ $debian -ne 1 ] | [ $ubuntu -ne 1 ]; do														#
@@ -37,13 +37,16 @@ while [ $debian -ne 1 ] | [ $ubuntu -ne 1 ]; do														#
 		break																	#
 	else																		#
 		if [[ $dist != "null" ]];then														#
-			echo "Veuillez remplir correctement le champ indiqué\n"										#
+			echo "Veuillez remplir correctement le champ indiqué \n"									#
 		fi																	#
 		read dist																#
 		continue																#
 	fi																		#
 done																			#
 #########################################################################################################################################################
+
+
+
 
 
 #### Ubuntu environment metapackages ####
@@ -91,7 +94,7 @@ while [ $gnome_u -ne 1 ] | [ $kde_u -ne 1 ] | [ $mate_u -ne 1 ] | [ $cinnamon -n
 		break																		#
 	else																			#
 		if [[ $envi != "null" ]];then															#
-			echo "Veuillez remplir correctement le champ indiqué\n"											#
+			echo "Veuillez remplir correctement le champ indiqué \n"											#
 		fi																		#
 		read envi																	#
 		continue																	#
@@ -118,14 +121,14 @@ done												#
 ########################################## Loop for new files ###########################################	
 echo -e "Veuillez maintenant ajouter les fichier à inclure dans l'environnement.\n"			#
 echo -e "Veillez à taper le chemin exacte du ou des fichiers désirés, séparés par un espace. \n"	#
-echo -e "Une fois tous les paquets ajoutés, faites un "retour chariot" (entré). \n"			#
+echo -e "Une fois tous les chemins de fichiers ajoutés, faites un "retour chariot" (entré). \n"		#
 													#
 read -a files												#
 fileLength=$(echo ${#files[@]})										#	
 arrayf=$(echo ${packets[@]})										#
 													#
 for i in `seq 1 $fileLength`; do									#
-	echo $arrayf | cut -d" " -f$i | xargs -i cp {}  includes.binary/ 									#
+	echo $arrayf | cut -d" " -f$i | xargs -i cp {}  includes.binary/ 				#
 done													#
 #########################################################################################################
 
