@@ -12,9 +12,9 @@ fi												    #
 
 
 ###################  Création du répertoire de travail  ############################################# 
-#sudo mkdir -p $HOME/live-debian								    #
-#cd $HOME/live-debian										    #
-echo -e "Le script va construite l'image ISO dans le répertoire $HOME/live-debian"		    #
+#sudo mkdir -p $HOME/live-debian-project						            #
+#cd $HOME/live-debian-project									    #
+echo -e "Le script va construite l'image ISO dans le répertoire $HOME/live-debian-project"	    #
 #sudo lb config											    #
 #####################################################################################################
 
@@ -46,7 +46,9 @@ done																			#
 #########################################################################################################################################################
 
 
-
+if [ $ -eq 1 ]; then 
+	sed -i 's/debian/ubuntu/g' config
+	sed -i 's/buster/focal/g' config
 
 
 #### Ubuntu environment metapackages ####
