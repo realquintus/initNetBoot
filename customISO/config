@@ -1,0 +1,26 @@
+#!/bin/sh
+
+set -e
+
+lb config noauto \
+--mode "debian" \
+--system "live" \
+--architectures "amd64" \
+--distribution "buster" \
+--apt "aptitudes" \
+--archive-areas "main contrib non-free" \
+--apt-source-archives "false" \
+--security "true" \
+--updates "true" \
+--backports "true" \
+--firmware-binary "true" \
+--firmware-chroot "true" \
+--bootloaders "grub-efi" \
+--bootappend-live "boot=live components persistence locales=fr_FR.UTF-8 \
+keyboard-layouts=fr timezone=Europe/Paris username=live quiet" \
+--binary-images "iso-hybrid" \
+--debian-installer "true" \
+--debian-installer-gui "false" \
+--memtest "none" \
+--verbose \
+"${@}"
