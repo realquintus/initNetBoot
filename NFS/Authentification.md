@@ -139,3 +139,16 @@ https://blog.devensys.com/kerberos-principe-de-fonctionnement/
 https://linux.die.net/man/1/kinit
 https://docs.oracle.com/cd/E23941_01/E26840/html/kerberos-auth.html
 https://docs.oracle.com/cd/E24843_01/html/E23285/intro-1.html#scrolltoc
+"J'ai eu ce même problème et c'est la résolution qui a fonctionné pour moi:
+sur le serveur nfs, assurez-vous que nfs-secure et nfs-secure-server sont à la fois activés et actifs.
+Sur le client nfs, assurez-vous que nfs-secure est activé et actif.
+assurez-vous également que le package nfs-utils est installé."
+
+Un script qui demande tout les noms des étudiants, il ne sera demandé qu'une fois, pourquoi pas lire un fichier directement (plus simple)
+Le script créer un dossier au nom de chaque étudiant avec pour ip étudiant.dns avec les droits d'accès prévus.
+
+Pour que cela fonctionne il faut que chaque machine porte le nom de l'étudiant affilier. si une fois boot le nom est le même pour tous ou qu'il ne correspond pas à votre nom. 
+
+Pensez à faire un petit scrip pour que l'utilisateur n'ai qu'a tapé son nom pour que la machine soit conforme.
+
+Comme ça chaque élève peut s'assoir ou il le souhaite dans la classe. 
