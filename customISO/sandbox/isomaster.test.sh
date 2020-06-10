@@ -45,10 +45,14 @@ while [ $debian -ne 1 ] | [ $ubuntu -ne 1 ]; do														#
 done																			#
 #########################################################################################################################################################
 
-
-if [ $ -eq 1 ]; then 
-	sed -i 's/debian/ubuntu/g' config
-	sed -i 's/buster/focal/g' config
+######################### Test et remplacement de la distribution Linux #################
+if [ $debian -eq 1 ]; then 								#
+	distrib=$( cat config | sed -n '9p' | awk '{print $2}' | sed -e  's/"//g')	#
+	sed -e "s/$distrib/focal/g"							#
+else 											#
+	distrib=$( cat config | sed -n '9p' | awk '{print $2}' | sed -e  's/"//g')	#
+	sed -e "s/$distrib/buster/g"							#
+#########################################################################################
 
 
 #### Ubuntu environment metapackages ####
