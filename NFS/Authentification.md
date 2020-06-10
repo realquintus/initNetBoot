@@ -111,13 +111,20 @@ Avec listprincs on peut voir les utilisateurs déjà créé.
 Il nous faurt dersormer en ajouter 1 pour le serveur NFS.
 Pour ce faire :
 ```
-addprinc server_nfs/admin
+addprinc -randkey nfs/server_nfs.home
 ```
 Par exemple.
 Il vous vouler le supprimer il suffit de faire la commande,
 ```
-delprinc server_nfs/admin
+delprinc -p nfs/server_nfs.home
 ```
+on peut afficher la liste des utilisateurs créés avec la commande listprinc
+
+On Ajoute le principal de service du serveur NFS au fichier keytab du serveur.
+```ktadd nfs/server_nfs.home
+```
+Le fichiers où se trouve la keytab est /etc/krb5.keytab. Pour qu'il n'y est pas d'erreur le fichier krb5.keytab doit se trouver sur toutes les machines.
+
 NFS
 https://www.netapp.com/fr/communities/tech-ontap/nfsv4-0508-fr.aspx
 https://help.ubuntu.com/community/NFSv4Howto
