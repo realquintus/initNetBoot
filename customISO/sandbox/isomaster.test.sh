@@ -11,12 +11,18 @@ fi												    #
 #####################################################################################################
 
 
-###################  Création du répertoire de travail  ############################################# 
-#sudo mkdir -p $HOME/live-debian-project						            #
-#cd $HOME/live-debian-project									    #
-echo -e "Le script va construite l'image ISO dans le répertoire $HOME/live-debian-project"	    #
-#sudo lb config											    #
-#####################################################################################################
+###################  Création du répertoire de travail  ################################################# 
+#sudo mkdir -p $HOME/live-debian-project						            	#
+#cd $HOME/live-debian-project									    	#
+echo -e "Le script va construite l'image ISO dans le répertoire $HOME/live-debian-project"	    	#
+echo -e "Voulez vous build la base de l'image ? [y-n]"							#
+read base												#
+if [ $base == "y" ];then										#
+	sudo lb config											#
+else													#
+	exit 1											    	#	
+fi													#
+#########################################################################################################
 
 
 ubuntu=0
@@ -48,11 +54,17 @@ done																			#
 ######################### Test et remplacement de la distribution Linux #################
 if [ $debian -eq 1 ]; then 								#
 	distrib=$( cat config | sed -n '9p' | awk '{print $2}' | sed -e  's/"//g')	#
-	sed -e "s/$distrib/focal/g"							#
+	sed -i "s/$distrib/focal/g"							#
 else 											#
 	distrib=$( cat config | sed -n '9p' | awk '{print $2}' | sed -e  's/"//g')	#
-	sed -e "s/$distrib/buster/g"							#
+	sed -i "s/$distrib/buster/g"							#
 #########################################################################################
+
+
+echo -e "Remplissage des metapaquets d'environnement nécessaires\n"
+echo -e 
+
+
 
 
 #### Ubuntu environment metapackages ####
@@ -79,34 +91,47 @@ fi																				#
 while [ $gnome_u -ne 1 ] | [ $kde_u -ne 1 ] | [ $mate_u -ne 1 ] | [ $cinnamon -ne 1 ] | [ $gnome_d -ne 1 ] | [ $kde_d -ne 1 ] | [ $mate_d -ne 1 ]; do		#
 	if [[ $envi == "gnome_u" ]]; then															# 
 		gnome_u=1																	#
-		break																		#
+		fin_env="gnome-shell"																# 			 break 																		 #
 	elif [[ $envi == "kde_u" ]]; then															#
-       		kde_u=1																		#
+       		kde_u=1																		#	
+		fin_env="plasma-desktop"															#
 		break																		#
 	elif [[ $envi == "mate_u" ]]; then															#
        		mate_u=1																	#
+		fin_env="mate-desktop-environment-core"														#
 		break																		#
 	elif [[ $envi == "cinnamon" ]]; then															#
        		cinnamon=1																	#
+		fin_env="cinnamon-core"																#
 		break																		#
 	elif [[ $envi == "gnome_d" ]]; then															#
        		gnome_d=1																	#
+		fin_env="task-gnome-desktop"															#
 		break																		#
 	elif [[ $envi == "kde_d" ]]; then															#
        		kde_d=1																		#
+		fin_env="task-kde-desktop"															#
 		break																		#
 	elif [[ $envi == "mate_d" ]]; then															#
        		mate_d=1																	#
+		fin_env="mate-desktop-environment"														#
 		break																		#
 	else																			#
 		if [[ $envi != "null" ]];then															#
-			echo "Veuillez remplir correctement le champ indiqué \n"											#
+			echo "Veuillez remplir correctement le champ indiqué \n"										#
 		fi																		#
 		read envi																	#
 		continue																	#
 	fi																			#
-done																				#
+done
+
+
+
+																				
 #################################################################################################################################################################
+
+
+
 
 
 ########################################## Loop for additional packages #########################	
