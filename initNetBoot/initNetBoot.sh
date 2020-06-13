@@ -3,7 +3,7 @@ usage(){
 	echo -e "\e[1mInitNetBoot.sh\e[0m is a bash script that is used to initialize a network boot server using PXE.\nFirstly, it will install/update dependencies, then configure and enable DHCP and TFTP server.\n\t\e[1m\e[4mOptions:\e[0m\e[0m\n\t\t-h : Show this help message.\n\t\t-f : This option is needed and is used to indicate the image that you want to be available on the local network.\n\t\t-I : This option is required and is used to indicates the network interface through which the server will be available.\n\t\t-v : Verbose mode\n\t\t-N : This option is not required and permit to not install needed packages, use it only if you already have them.\n\t\t-l : This option is not required and permit to make available a live image on the network. Make sure to a compatible image. If this option is not entered the image will be installed on the PXE client."
 }
 ########################################## Handling options ############################################################
-while getopts "f:vI:hNl" option;do											#
+while getopts "f:vI:hNlS" option;do											#
 	case $option in													#
 		f)													#
 			if [ -e $OPTARG ];then										#
@@ -35,6 +35,9 @@ while getopts "f:vI:hNl" option;do											#
 		;;
 		l)
 			live="true"
+		;;
+		S)
+			share_file="true"
 		;;
 	esac														#
 done															#
@@ -188,5 +191,5 @@ cat $(echo $0 | sed 's/initNetBoot.sh//g')dnsmasq.conf | sed "s/%NIC%/$interface
 if [[ $verb = "true" ]];then									 	#
 	echo "Restarting dnsmasq..."								 	#
 fi												 	#
-systemctl restart dnsmasq.service
+systemctl restart dnsmasq.service									#
 #########################################################################################################
