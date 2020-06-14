@@ -11,12 +11,18 @@ fi												    #
 #####################################################################################################
 
 
-###################  Création du répertoire de travail  ############################################# 
-#sudo mkdir -p $HOME/live-debian								    #
-#cd $HOME/live-debian										    #
-echo -e "Le script va construite l'image ISO dans le répertoire $HOME/live-debian"		    #
-#sudo lb config											    #
-#####################################################################################################
+###################  Création du répertoire de travail  ################################################# 
+#sudo mkdir -p $HOME/live-debian-project						            	#
+#cd $HOME/live-debian-project									    	#
+echo -e "Le script va construite l'image ISO dans le répertoire $HOME/live-debian-project"	    	#
+echo -e "Voulez vous build la base de l'image ? [y-n]"							#
+read base												#
+if [ $base == "y" ];then										#
+	sudo lb config											#
+else													#
+	exit 1											    	#	
+fi													#
+#########################################################################################################
 
 
 ubuntu=0
@@ -25,7 +31,7 @@ debian=0
 dist="null"
 ################################################ Loop for the selection of the distribution #############################################################	
 echo -e "L'initialisation de la construction de l'image ISO est en cours, \ndes choix sur la personnalisation de celle-ci vont vous être proposés." 	#
-echo -e "\t\tVeuillez répondre correctement. \n\n"														#
+echo -e "\t\tVeuillez répondre correctement. \n\n"													#
 echo -e "Quel distribution de Linux voulez-vous ? \t [debian / ubuntu]"											#
 																			#
 while [ $debian -ne 1 ] | [ $ubuntu -ne 1 ]; do														#
@@ -37,13 +43,30 @@ while [ $debian -ne 1 ] | [ $ubuntu -ne 1 ]; do														#
 		break																	#
 	else																		#
 		if [[ $dist != "null" ]];then														#
-			echo "Veuillez remplir correctement le champ indiqué\n"										#
+			echo "Veuillez remplir correctement le champ indiqué \n"									#
 		fi																	#
 		read dist																#
 		continue																#
 	fi																		#
 done																			#
 #########################################################################################################################################################
+
+######################### Test et remplacement de la distribution Linux #################
+if [ $debian -eq 1 ]; then 								#
+	distrib=$( cat config | sed -n '9p' | awk '{print $2}' | sed -e  's/"//g')	#
+	sed -i "s/$distrib/focal/g"							#
+else 											#
+	distrib=$( cat config | sed -n '9p' | awk '{print $2}' | sed -e  's/"//g')	#
+	sed -i "s/$distrib/buster/g"							#
+#########################################################################################
+
+######################### Ajout des metapaquets d'environnement nécessaires #####
+echo -e "Remplissage des metapaquets d'environnement nécessaires\n"		#
+										#
+base_pak="task-desktop\ntask-french\ntask-french-desktop\nconsole-setup"	#
+echo -e $base_pak >> package.list.chroot					#
+#################################################################################
+
 
 
 #### Ubuntu environment metapackages ####
@@ -70,34 +93,48 @@ fi																				#
 while [ $gnome_u -ne 1 ] | [ $kde_u -ne 1 ] | [ $mate_u -ne 1 ] | [ $cinnamon -ne 1 ] | [ $gnome_d -ne 1 ] | [ $kde_d -ne 1 ] | [ $mate_d -ne 1 ]; do		#
 	if [[ $envi == "gnome_u" ]]; then															# 
 		gnome_u=1																	#
-		break																		#
+		fin_env="gnome-shell"																# 			 break 																		 #
 	elif [[ $envi == "kde_u" ]]; then															#
-       		kde_u=1																		#
+       		kde_u=1																		#	
+		fin_env="plasma-desktop"															#
 		break																		#
 	elif [[ $envi == "mate_u" ]]; then															#
        		mate_u=1																	#
+		fin_env="mate-desktop-environment-core"														#
 		break																		#
 	elif [[ $envi == "cinnamon" ]]; then															#
        		cinnamon=1																	#
+		fin_env="cinnamon-core"																#
 		break																		#
 	elif [[ $envi == "gnome_d" ]]; then															#
        		gnome_d=1																	#
+		fin_env="task-gnome-desktop"															#
 		break																		#
 	elif [[ $envi == "kde_d" ]]; then															#
        		kde_d=1																		#
+		fin_env="task-kde-desktop"															#
 		break																		#
 	elif [[ $envi == "mate_d" ]]; then															#
        		mate_d=1																	#
+		fin_env="mate-desktop-environment"														#
 		break																		#
 	else																			#
 		if [[ $envi != "null" ]];then															#
-			echo "Veuillez remplir correctement le champ indiqué\n"											#
+			echo "Veuillez remplir correctement le champ indiqué \n"										#
 		fi																		#
 		read envi																	#
 		continue																	#
 	fi																			#
 done																				#
+																				#
+#### Ajout du metapaquet d'environnement dans le fichier des paquets ####											#
+echo $fin_env >> package.list.chroot					#											#
+#########################################################################											#
+																				#
 #################################################################################################################################################################
+
+
+
 
 
 ########################################## Loop for additional packages #########################	
@@ -118,17 +155,25 @@ done												#
 ########################################## Loop for new files ###########################################	
 echo -e "Veuillez maintenant ajouter les fichier à inclure dans l'environnement.\n"			#
 echo -e "Veillez à taper le chemin exacte du ou des fichiers désirés, séparés par un espace. \n"	#
-echo -e "Une fois tous les paquets ajoutés, faites un "retour chariot" (entré). \n"			#
+echo -e "Une fois tous les chemins de fichiers ajoutés, faites un "retour chariot" (entré). \n"		#
 													#
 read -a files												#
 fileLength=$(echo ${#files[@]})										#	
 arrayf=$(echo ${packets[@]})										#
 													#
 for i in `seq 1 $fileLength`; do									#
-	echo $arrayf | cut -d" " -f$i | xargs -i cp {}  includes.binary/ 									#
+	echo $arrayf | cut -d" " -f$i | xargs -i cp {}  includes.binary/ 				#
 done													#
 #########################################################################################################
 
 
 
-
+#### Construction de l'image ISO Live ###################################################################################################
+echo -e "Votre Image Live va être contruite êtes vous sur de vouloir lancer cette opération (cela prend quelques minutes) ? [y-n]\n"	#
+read build_l																#
+if [ $build_l == 'yes' ]; then 														#
+	sudo lb build															#
+else 																	#
+	echo -e "Vous pourrez la commande de construction tout seul grâce à [lb build]"							#
+fi																	#	
+#########################################################################################################################################
