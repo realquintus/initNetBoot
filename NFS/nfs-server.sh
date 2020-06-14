@@ -38,7 +38,7 @@ if [ -n $secure ] && [ -z $etu ] && [ -z $clean ];then
 fi
 if [ -n $clean ] && [ -z $etu ] && [ -z $secure ];then
 	systemctl stop nfs-server
-	echo "" > /etc/exports
+	echo "/var/tftpboot/nfs 192.168.55.0/24(sync,no_root_squash,no_subtree_check,ro)" > /etc/exports
 	rm -rf /var/nfs_server/users/*
 	exit 0
 fi
