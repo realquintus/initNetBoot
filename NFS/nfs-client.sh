@@ -26,5 +26,6 @@ elif [ -n $private_dir ] && [ -z $login ] && [ -z $clear ];then
 elif [ -n $clear ] && [ -z $login ] && [ -z $private_dir ];then
 	umount -f /mnt/nfs-server 2> /dev/null
 	umount -f /mnt/save 2> /dev/null
+	rm /tmp/nfs_client.tmp
 fi
 
