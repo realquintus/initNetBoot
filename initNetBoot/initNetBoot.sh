@@ -176,3 +176,17 @@ if [[ $verb = "true" ]];then
 fi
 systemctl restart dnsmasq.service
 #######################################################################
+
+########## Activate ipfoward ################
+if [[ $verb = "true" ]];then
+	echo "Activating ip forwarding..."
+fi
+echo 1 > /proc/sys/net/ipv4/ip_forward
+#############################################
+
+######### iptable rule ######################
+if [[ $verb = "true" ]];then
+	echo "iptables: Accept UDP port 69"
+fi
+iptables -A INPUT -p udp -m udp --dport 69 -j ACCEPT
+############################################
