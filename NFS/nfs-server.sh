@@ -26,8 +26,7 @@ if [ -n $etu ] && [ -z $secure ] && [ -z $clean ];then
 	fi
 	systemctl restart nfs-server
 	exit 0
-fi
-if [ -n $secure ] && [ -z $etu ] && [ -z $clean ];then
+elif [ -n $secure ] && [ -z $etu ] && [ -z $clean ];then
 	mkdir /var/nfs_server/auth/ 2> /dev/null
 	for user in $(ls /var/nfs_server/users);do
 		mkdir /var/nfs_server/auth/$user 2> /dev/null
@@ -35,10 +34,13 @@ if [ -n $secure ] && [ -z $etu ] && [ -z $clean ];then
 	done
 	systemctl restart nfs-server
 	exit 0
-fi
-if [ -n $clean ] && [ -z $etu ] && [ -z $secure ];then
+elif [ -n $clean ] && [ -z $etu ] && [ -z $secure ];then
 	systemctl stop nfs-server
 	echo "/var/tftpboot/nfs 192.168.55.0/24(sync,no_root_squash,no_subtree_check,ro)" > /etc/exports
 	rm -rf /var/nfs_server/users/*
 	exit 0
+else
+	echo "You need to enter one and only one option."
+	usage
+	exit 1
 fi
