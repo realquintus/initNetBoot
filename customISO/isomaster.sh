@@ -3,27 +3,13 @@
 ###################  Test de présence du paquet live-build  #########################################
 test=$(lb --version)										    #				
 if [ -n "$test" ]; then 									    #
-	echo -e "Live-Build installé en version $(echo $test)"					    #
+	echo -e "Live-Build installé en version $(echo $test)\n"				    #
 else 												    #
 	echo -e "Live-Build n'est pas installé, l'installation va démarrer \n "			    #
 	sudo apt install live-build								    #
 fi												    #
 #####################################################################################################
-
-
-###################  Création du répertoire de travail  ################################################# 
-#sudo mkdir -p $HOME/live-debian-project						            	#
-#cd $HOME/live-debian-project									    	#
-echo -e "Le script va construite l'image ISO dans le répertoire $HOME/live-debian-project"	    	#
-echo -e "Voulez vous build la base de l'image ? [y-n]"							#
-read base												#
-if [ $base == "y" ];then										#
-	sudo lb config											#
-else													#
-	exit 1											    	#	
-fi													#
-#########################################################################################################
-
+path=$( realpath $0 | grep -o '^.*/' )
 
 ubuntu=0
 debian=0
@@ -31,7 +17,7 @@ debian=0
 dist="null"
 ################################################ Loop for the selection of the distribution #############################################################	
 echo -e "L'initialisation de la construction de l'image ISO est en cours, \ndes choix sur la personnalisation de celle-ci vont vous être proposés." 	#
-echo -e "\t\tVeuillez répondre correctement. \n\n"													#
+echo -e "Veuillez répondre correctement. \n\n"														#
 echo -e "Quel distribution de Linux voulez-vous ? \t [debian / ubuntu]"											#
 																			#
 while [ $debian -ne 1 ] | [ $ubuntu -ne 1 ]; do														#
@@ -54,16 +40,26 @@ done																			#
 ######################### Test et remplacement de la distribution Linux #################
 if [ $debian -eq 1 ]; then 								#
 	distrib=$( cat config | sed -n '9p' | awk '{print $2}' | sed -e  's/"//g')	#
-	sed -i "s/$distrib/focal/g"							#
+	sed -i "s/$distrib/buster/g" config						#
 else 											#
 	distrib=$( cat config | sed -n '9p' | awk '{print $2}' | sed -e  's/"//g')	#
-	sed -i "s/$distrib/buster/g"							#
+	sed -i "s/$distrib/focal/g" config						#
+fi											#
+											#
+if [ $debian -eq 1 ]; then 								#
+	distrib_l=$( cat config | sed -n '6p' | awk '{print $2}' | sed -e  's/"//g')	#
+	sed -i "s/$distrib_l/debian/g"	config						#
+else 											#
+	distrib_l=$( cat config | sed -n '6p' | awk '{print $2}' | sed -e  's/"//g')	#
+	sed -i "s/$distrib_l/ubuntu/g"	config						#
+fi											#
 #########################################################################################
 
 ######################### Ajout des metapaquets d'environnement nécessaires #####
 echo -e "Remplissage des metapaquets d'environnement nécessaires\n"		#
 										#
 base_pak="task-desktop\ntask-french\ntask-french-desktop\nconsole-setup"	#
+echo "" > package.list.chroot							#
 echo -e $base_pak >> package.list.chroot					#
 #################################################################################
 
@@ -128,7 +124,7 @@ while [ $gnome_u -ne 1 ] | [ $kde_u -ne 1 ] | [ $mate_u -ne 1 ] | [ $cinnamon -n
 done																				#
 																				#
 #### Ajout du metapaquet d'environnement dans le fichier des paquets ####											#
-echo $fin_env >> package.list.chroot					#											#
+echo -e $fin_env >> package.list.chroot					#											#
 #########################################################################											#
 																				#
 #################################################################################################################################################################
@@ -138,8 +134,8 @@ echo $fin_env >> package.list.chroot					#											#
 
 
 ########################################## Loop for additional packages #########################	
-echo -e "Veuillez maintenant ajouter les paquets à inclure dans l'environnement.\n"		#
-echo -e "Veillez à taper le nom exacte du ou des paquets désirés, séparés par un espace. \n"	#
+echo -e "\nVeuillez maintenant ajouter les paquets à inclure dans l'environnement."		#
+echo -e "Veillez à taper le nom exacte du ou des paquets désirés, séparés par un espace."	#
 echo -e "Une fois tous les paquets ajoutés, faites un "retour chariot" (entré). \n"		#
 												#
 read -a packets											#
@@ -153,8 +149,8 @@ done												#
 
 
 ########################################## Loop for new files ###########################################	
-echo -e "Veuillez maintenant ajouter les fichier à inclure dans l'environnement.\n"			#
-echo -e "Veillez à taper le chemin exacte du ou des fichiers désirés, séparés par un espace. \n"	#
+echo -e "\nVeuillez maintenant ajouter les fichier à inclure dans l'environnement."			#
+echo -e "Veillez à taper le chemin exacte du ou des fichiers désirés, séparés par un espace. "		#
 echo -e "Une fois tous les chemins de fichiers ajoutés, faites un "retour chariot" (entré). \n"		#
 													#
 read -a files												#
@@ -166,12 +162,27 @@ for i in `seq 1 $fileLength`; do									#
 done													#
 #########################################################################################################
 
-
+###################  Création du répertoire de travail  ################################################# 
+sudo mkdir -p $HOME/live-debian-project							            	#
+cd $HOME/live-debian-project									    	#
+echo -e "Le script va construite l'image ISO dans le répertoire $HOME/live-debian-project"	    	#
+echo -e "Voulez vous construite la base de l'image ? [y-n]"						#
+read base												#
+if [ $base == "y" ];then										#
+	sudo lb config &> /dev/null									#
+else													#
+	exit 1											    	#	
+fi													#
+#########################################################################################################
 
 #### Construction de l'image ISO Live ###################################################################################################
-echo -e "Votre Image Live va être contruite êtes vous sur de vouloir lancer cette opération (cela prend quelques minutes) ? [y-n]\n"	#
+yes | sudo cp -u $path/config $HOME/live-debian-project/auto/										#
+yes | sudo cp -u $path/package.list.chroot $HOME/live-debian-project/config/package-lists/						#
+yes | sudo cp -ur $path/includes.binary/* $HOME/live-debian-project/config/includes.binary/						#
+																	#
+echo -e "Votre Image Live va être contruite êtes vous sur de vouloir lancer cette opération (cela prend quelques minutes) ? [y-n]"	#
 read build_l																#
-if [ $build_l == 'yes' ]; then 														#
+if [ $build_l == "y" ]; then 														#
 	sudo lb build															#
 else 																	#
 	echo -e "Vous pourrez la commande de construction tout seul grâce à [lb build]"							#

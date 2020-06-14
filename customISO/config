@@ -16,8 +16,7 @@ lb config noauto \
 --firmware-binary "true" \
 --firmware-chroot "true" \
 --bootloaders "grub-efi" \
---bootappend-live "boot=live components persistence locales=fr_FR.UTF-8 \
-keyboard-layouts=fr timezone=Europe/Paris username=live quiet" \
+--bootappend-live "boot=live components persistence locales=fr_FR.UTF-8 keyboard-layouts=fr timezone=Europe/Paris username=live autologin hostname=NetBoot_RT2" \
 --binary-images "iso-hybrid" \
 --debian-installer "true" \
 --debian-installer-gui "false" \
