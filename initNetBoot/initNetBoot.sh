@@ -129,7 +129,7 @@ if [[ $verb = "true" ]];then
 	echo "Copying needed library in tftp folder..."
 fi
 if [ -z $(ls /var/tftpboot/ | grep pxelinux.0) ];then
-	sudo cp /usr/lib/syslinux/bios/* /var/tftpboot/
+	sudo cp $(echo $0 | sed 's/initNetBoot.sh//g')lib/* /var/tftpboot/
 fi
 ####################################################################################################
 
