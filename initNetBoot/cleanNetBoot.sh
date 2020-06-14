@@ -45,7 +45,7 @@ if [[ $full_clean == "true" ]];then
 	if ! [ -z $(echo $lib | grep -o "apt") ];then
 		remove_command="apt remove -y ""$(if [ -z $verb ];then echo '-q ';fi)""dnsmasq pxelinux syslinux-common nfs-kernel-server"
 	elif ! [ -z $(echo $lib | grep -o "pacman") ];then
-		remove_command="pacman -Rsy $(if [ -z $verb ];then echo '-q ';fi)--noconfirm dnsmasq pxelinux syslinux nfs-utils"
+		remove_command="pacman -Rs $(if [ -z $verb ];then echo '-q ';fi)--noconfirm dnsmasq pxelinux syslinux nfs-utils"
 	elif ! [ -z $(echo $lib | grep -o "yum") ];then
 		remove_command="yum remove -y $(if [ -z $verb ];then echo '-q ';fi)dnsmasq pxelinux syslinux nfs-utils"
 	else
@@ -56,13 +56,13 @@ if [[ $full_clean == "true" ]];then
 		read confirm_packages
 		confirm_packages=${confirm_packages:-"y"}
 	fi
-	if [ -z $no_confirm ] || [[ $confirm_packages == "y" ]] || [[ $confirm_packages == "Y" ]];then
+	if ! [ -z $no_confirm ] || [[ $confirm_packages == "y" ]] || [[ $confirm_packages == "Y" ]];then
 		if [[ $verb = "true" ]];then
-			echo -e "\n## Removing packages: $install_command ##"
+			echo -e "\n## Removing packages: $remove_command ##"
 		else
-			install_command="$install_command"" > /dev/null"
+			remove_command="$remove_command"" > /dev/null"
 		fi
-		eval $install_command
+		eval $remove_command
 		if [[ $verb = "true" ]];then
 			echo -e "## Remove finished ##\n"
 		fi
@@ -76,14 +76,38 @@ if [ -z $no_confirm ];then
 	read confirm_folder
 	confirm_folder=${confirm_folder:-"y"}
 fi
-if [ -z $no_confirm ] || [[ $confirm_folder == "y" ]] || [[ $confirm_folder == "Y" ]];then
-	if [[ $verb = "true" ]];then		      #
-		echo "Cleaning tftp's folder: /var/tftpboot/"	      #
+if ! [ -z $no_confirm ] || [[ $confirm_folder == "y" ]] || [[ $confirm_folder == "Y" ]];then
+	if [[ $verb = "true" ]];then
+		echo "Cleaning tftp's folder: /var/tftpboot/"
 	fi
-	if [ -z $full_clean ];then
+	if ! [ -z $full_clean ];then
 		rm -rf /var/tftpboot/live/* /var/tftpboot/nfs/* /var/tftpboot/pxelinux.cfg/*
 	else
 		rm -rf /var/tftpboot/
 	fi
 fi
 ###############################################
+
+if [ -z $no_confirm ];then
+	echo "Stop ip forwarding? (Y/n):"
+	read confirm_forward
+	confirm_forward=${confirm_forward:-"y"}
+fi
+if ! [ -z $no_confirm ] || [[ $confirm_forward == "y" ]] || [[ $confirm_forward == "Y" ]];then
+	if [[ $verb = "true" ]];then
+		echo "Stoping ip forwarding..."
+	fi
+	echo 0 > /proc/sys/net/ipv4/ip_forward
+fi
+
+if [ -z $no_confirm ];then
+	echo -e "Delete iptables rule:\n $(iptables -L | sed -n '2p')\n$(iptables -L INPUT | grep 'udp dpt:tftp')"
+	read confirm_iptables
+	confirm_iptables=${confirm_iptables:-"y"}
+fi
+if ! [ -z $no_confirm ] || [[ $confirm_iptables == "y" ]] || [[ $confirm_iptables == "Y" ]];then
+	if [[ $verb = "true" ]];then
+		echo "Deleting it..."
+	fi
+	iptables -D FORWARD $(iptables -L INPUT --line-numbers | grep "udp dpt:tftp" | awk '{print $1}')
+fi
