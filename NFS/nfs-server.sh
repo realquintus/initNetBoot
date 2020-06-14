@@ -21,7 +21,7 @@ while getopts "esch" option;do							#
 done
 if [ -n $etu ] && [ -z $secure ] && [ -z $clean ];then		
 	mkdir -p /var/nfs_server/users 2> /dev/null
-	if [[ $(cat /etc/exports | grep "nfs_server/users 192.168.55.0/24") == "" ]];then
+	if [[ $(cat /etc/exports | grep "nfs_server/users 192.168.1.0") == "" ]];then
 		echo "/var/nfs_server/users 192.168.55.0/24(sync,no_root_squash,no_subtree_check,rw)" >> /etc/exports
 	fi
 	systemctl restart nfs-server
