@@ -66,26 +66,14 @@ ip addr add 192.168.55.254/24 dev $interface
 	exit 4
 fi
 
-# Checking if server is using UEFI, if not, it might cause problem like break your bios
-[ -d /sys/firmware/efi ] && efi="true" || efi="false"
-
 #################### Installing/updating dependencies #############################################
 lib="$(ls /var/lib/)"
-if ! [ -z $(echo $lib | grep -o "apt") ];then
-	install_command="apt install -y ""$(if [ -z $verb ];then echo '-q ';fi)""dnsmasq pxelinux syslinux-common"
-	if [ -n $live ];then
-		install_command="$install_command"" nfs-kernel-server"
-	fi
-elif ! [ -z $(echo $lib | grep -o "pacman") ];then
-	install_command="pacman -Sy $(if [ -z $verb ];then echo '-q ';fi)--noconfirm dnsmasq pxelinux syslinux"
-	if [ -n $live ];then
-		install_command="$install_command"" nfs-utils"
-	fi
-elif ! [ -z $(echo $lib | grep -o "yum") ];then
-	install_command="yum install -y $(if [ -z $verb ];then echo '-q ';fi)dnsmasq pxelinux syslinux"
-	if [ -n $live ];then
-		install_command="$install_command"" nfs-utils"
-	fi
+if ! [ -z "$(echo $lib | grep -o 'apt')" ];then
+	install_command="apt install -y ""$(if [ -z $verb ];then echo '-q ';fi)""dnsmasq pxelinux syslinux-common nfs-kernel-server"
+elif ! [ -z "$(echo $lib | grep -o 'pacman')" ];then
+	install_command="pacman -Sy $(if [ -z $verb ];then echo '-q ';fi)--noconfirm dnsmasq pxelinux syslinux nfs-utils"
+elif ! [ -z "$(echo $lib | grep -o 'yum')" ];then
+	install_command="yum install -y $(if [ -z $verb ];then echo '-q ';fi)dnsmasq pxelinux syslinux nfs-utils"
 else
 	echo "Warning: Your package manager is not detected, make sure you have install dnsmasq, pxelinux and syslinux (or syslinux-common) packages"
 fi
