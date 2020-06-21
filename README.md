@@ -1,9 +1,5 @@
----
-title: Compte rendu projet RT2
----
-
 ## <center> Projet RT2 boot réseau </center>
->[name=Pablo HOUSSE | Théo ANJARD | Solen BELLOUATI |] [time=14 juin 2020]
+> **Pablo HOUSSE | Théo ANJARD | Solen BELLOUATI | 19 juin 2020**
 
 <div style="text-align:center"><img src="https://i.imgur.com/JUsfL98.png" /></div>
 
